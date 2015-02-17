@@ -11,7 +11,7 @@ void testit()
 //	resultantPeakData peakData(60.0,125.0);
 //	result.push_back(peakData);
 	FindMultiplePeaks d(initParams);
-	d.process(result,adc);
-	std::cout << result[0].peakTime << std::endl;
-	std::cout << result[0].peakHeight << std::endl;
+	d.process(adc, result);
+	std::cout << result[0]._peakTime << std::endl;
+	std::cout << result[0]._peakHeight << std::endl;
 }

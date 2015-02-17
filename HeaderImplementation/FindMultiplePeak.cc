@@ -145,8 +145,8 @@ void FindDoublePeak::process(const adcWaveform adcData, resultantHitData &result
 	// Set initial fit parameters
 	const double timeShift0 = 30.0;
 	const double scalingFactor0 = TMath::Max((result[0]._peakHeight - _initParams._defaultPedestal) * _initParams._bits2scalingFactor, 1000.0);
-	double verticalShift = (adcData[0] + adcData[1]) * 0.5; // This has implicit casting
 	const double timeshift1 = result[1]._peakTime - result[0]._peakTime;
+	const double verticalShift = 0.0; // CHANGE EVENTUALLY
 	const double scalingFactor1 = TMath::Max((result[1]._peakHeight - _initParams._defaultPedestal) * _initParams._bits2scalingFactor, 1000.0);
 	const Double_t initialParameters[5] = {timeShift0, scalingFactor0, verticalShift, timeshift1, scalingFactor1};
 
@@ -172,6 +172,46 @@ void FindDoublePeak::fitParams2ResultantData(const Double_t *fitParameters, resu
 	result[0] = firstPeakData;
 	result[1] = secondPeakData;
 }
+
+/**FindDoublePeakWithConstantPedestal::FindDoublePeakWithConstantPedestal(const ConfigStruct &initParams) : FindPeakBaseRoot(initParams)
+{
+	_fitModel = TF1("fitModel",FitModelRoot::doublePeakTrunc,0.0,_initParams._hitPeriod,5);
+}
+
+// Fills result using adc waveform data using by fitting with the convolutionSinglePeakWithDynamicPedestal model
+// NOTE : This function may begin with peak data provided in result which is replaced
+void FindDoublePeakWithConstantPedestal::process(const adcWaveform adcData, resultantHitData &result)
+{
+	// Set initial fit parameters
+	const double timeShift0 = 30.0;
+	const double scalingFactor0 = TMath::Max((result[0]._peakHeight - _initParams._defaultPedestal) * _initParams._bits2scalingFactor, 1000.0);
+	const double verticalShift = (adcData[0] + adcData[1]) * 0.5; // This has implicit casting
+	const double timeshift1 = result[1]._peakTime - result[0]._peakTime;
+	const double scalingFactor1 = TMath::Max((result[1]._peakHeight - _initParams._defaultPedestal) * _initParams._bits2scalingFactor, 1000.0);
+	const Double_t initialParameters[5] = {timeShift0, scalingFactor0, verticalShift, timeshift1, scalingFactor1};
+
+	Double_t finalParameters[5];
+
+	FindPeakBaseRoot::adcWaveform2TGraphErrors(adcData, _fitData);
+	FindPeakBaseRoot::fitModel2NormalizedWaveform(_fitModel, _fitData, initialParameters, finalParameters);
+	fitParams2ResultantData(finalParameters, result);
+}
+
+void FindDoublePeakWithConstantPedestal::fitParams2ResultantData(const Double_t *fitParameters, resultantHitData &result)
+{
+	resultantPeakData firstPeakData;
+
+	// If there's time maybe make timeshift,scaling factor enumerated like true anomaly and eccentricity
+	firstPeakData._peakTime = fitParameters[0];
+	firstPeakData._peakHeight = fitParameters[1] * _initParams._scalingFactor2bits;
+
+	resultantPeakData secondPeakData;
+	secondPeakData._peakTime = fitParameters[3];
+	secondPeakData._peakHeight = fitParameters[4] * _initParams._scalingFactor2bits;
+
+	result[0] = firstPeakData;
+	result[1] = secondPeakData;
+}**/
 
 
 
@@ -282,7 +322,6 @@ void FindMultiplePeaks::process(const adcWaveform adcData, resultantHitData &res
 	}	
 }
 
-// TODO : FIGURE OUT WHY THIS FUNCTION IS NO LONGER RETURNING THE CORRECT VALUE
 // Performs explicit peak search on adc waveform data
 void FindMultiplePeaks::findPeaks(const TGraphErrors &gr, const ConfigStruct &initParams, resultantHitData &result, const double sigma)
 {
