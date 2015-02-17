@@ -4,3 +4,5 @@
 *.cxx
 *.DS_Store
 *.so
+*.o
+*.gitignore
